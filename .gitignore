@@ -1,0 +1,4 @@
+.vscode/
+
+# interpreter bytecode
+__pycache__/

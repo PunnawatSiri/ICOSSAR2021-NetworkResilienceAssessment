@@ -1,0 +1,5 @@
+pandas 
+numpy
+matplotlib
+networkx == 2.8.8
+mip==1.14.0
