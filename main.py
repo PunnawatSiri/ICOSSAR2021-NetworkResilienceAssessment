@@ -1,20 +1,22 @@
 # -*- coding: utf-8 -*-
-import numpy as np
+import copy
 import math
+import os
 import random
 from math import ceil
-import copy
-import pandas as pd
-from matplotlib import pyplot as plt
-from mip import Model, minimize, xsum, BINARY, OptimizationStatus
-import os
+
 # dir_path = os.path.dirname(os.path.realpath(__file__))    # go to the directory of the current script
 import networkx as nx
-
+import numpy as np
+import pandas as pd
+from matplotlib import pyplot as plt
+from mip import BINARY, Model, OptimizationStatus, minimize, xsum
 from utils import set_default_plot_param
+
 set_default_plot_param(plt)
 import data as dt
 from infrasnetwork import network
+
 #import failsimulation as fs
 
 
@@ -145,20 +147,25 @@ class System(object):
         Output:
             the initial failure sequence
         """
+        # print()
+        # print("Type: ", Type, "ratio: ", ratio)
         fail_num = math.floor(ratio*self.nodenum)
+        # print("fail_num",fail_num)
         self.initial_fail_seq_onehotcode = np.zeros(self.nodenum, dtype = int) #1 - failure, 0 - survive
-        
         if (Type == 'randomness'):
             self.initial_fail_seq = random.sample(range(self.nodenum), fail_num)
         else:  # case fail_num > self.nodenum needs not be handled because [-fail_num:]= ['all elements']
             # sort in descending order (negate the original) and return the indice of the top fail_num nodes
             exec('self.initial_fail_seq = np.argsort(-np.array(self.{}))[:fail_num]'.format(Type))  # sort in an ascending approach
-    
-        if (self.initial_fail_seq != []):
+        # print("initial_fail_seq", self.initial_fail_seq)
+        
+        self.initial_fail_seq = np.array(self.initial_fail_seq)  # Convert to NumPy array
+
+        if self.initial_fail_seq.size > 0:
             self.initial_fail_seq_onehotcode[np.array(self.initial_fail_seq)] = 1
+        # print("initial_fail_seq_onehotcode",self.initial_fail_seq_onehotcode)
         self.initial_fail_link_onehotcode = np.zeros(self.arcnum, dtype = int) #There are no initial failed links
         
-        # print(self.initial_fail_seq)
         
         return self.initial_fail_seq
         
@@ -226,7 +233,7 @@ class System(object):
                     flowin = flowin/2
 #                print('satisfied power demand', satisfynode[-self.power.nodenum:]/self.demand[-self.power.nodenum:])
                     
-                if self.initial_fail_seq != []:
+                if self.initial_fail_seq.size > 0:
                     performance_gas = np.sum(satisfynode[:self.gas.nodenum])/np.sum(self.demand[:self.gas.nodenum])
                     performance_power = np.sum(satisfynode[-self.power.nodenum:])/np.sum(self.demand[-self.power.nodenum:])
                 else:

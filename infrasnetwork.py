@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
+import matplotlib.pyplot as plt
+import networkx as nx
 import numpy as np
 import pandas as pd
-import networkx as nx
+
+
 class network(object):
     """ Define the network class for modeling the power and gas networks
     """
@@ -95,3 +98,9 @@ class network(object):
         self.kc = list(nx.algorithms.centrality.katz_centrality(self.graph).values())
         self.cc = list(nx.algorithms.centrality.closeness_centrality(self.graph).values())
         self.bc = list(nx.algorithms.centrality.betweenness_centrality(self.graph).values())
+
+    def viz(self, node_color='b'):
+        """ Visualize the network
+        """
+        nx.draw(self.graph, with_labels=True, node_color=node_color)
+        plt.show()
